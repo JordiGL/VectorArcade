@@ -7,7 +7,7 @@ Desarrollado en **Unity 6000.0.58f1 (URP, PC)** bajo una **arquitectura limpia (
 
 ## 🧱 Arquitectura
 
-![Architecture Diagram](https://raw.githubusercontent.com/JordiGL/VectorArcade/refs/heads/main/Docs/architecture.puml?token=GHSAT0AAAAAADM7OGZF243EJWHGKZMWLTEM2HLU26A)
+![Architecture Diagram](https://raw.githubusercontent.com/JordiGL/VectorArcade/refs/heads/main/Docs/architecture.puml?token=GHSAT0AAAAAADM7OGZFYTQ4ARVE5XKCZOXG2HLVBRA)
 
 El proyecto sigue una estructura **Clean Architecture**, separando responsabilidades en cuatro capas:
 
