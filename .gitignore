@@ -1,0 +1,56 @@
+# ========== UNITY ==========
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+MemoryCaptures/
+
+# Asset Store y paquetes
+[Aa]ssets/AssetStoreTools*
+[Aa]ssets/Plugins/Editor/JetBrains*
+
+# Auto-generated
+sysinfo.txt
+*.booproj
+*.pidb
+*.user
+*.suo
+*.userprefs
+*.unityproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.pidb.meta
+
+# Rider / VS
+.vscode/
+.idea/
+*.csproj
+*.unityproj
+*.sln
+*.sln.meta
+*.user
+*.DotSettings.user
+
+# Builds
+*.apk
+*.aab
+*.app
+*.exe
+*.dll
+*.zip
+*.tar.gz
+
+# Textures/Cache
+[Aa]ssets/StreamingAssets/
+[Aa]ssets/AddressableAssetsData/*/Build*
+[Aa]ssets/AddressableAssetsData/link.xml
+
+# Otros
+.DS_Store
+Thumbs.db
