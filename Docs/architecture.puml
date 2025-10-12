@@ -1,0 +1,211 @@
+@startuml Architecture_ClassDiagram
+title VectorArcade — Clean Architecture (Class Diagram)
+
+skinparam shadowing false
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+skinparam defaultFontName Consolas
+
+package "Domain" {
+  package "Core" {
+    class Vec3
+  }
+
+  package "Entities" {
+    class Player {
+      +Position : Vec3
+      +Forward  : Vec3
+      +ShootCooldown : float
+    }
+    class Asteroid {
+      +Position : Vec3
+      +Radius   : float
+      +Alive    : bool
+    }
+    class Bullet {
+      +Position : Vec3
+      +Velocity : Vec3
+      +Life     : float
+      +Alive    : bool
+    }
+    class GameState {
+      +Player : Player
+      +Asteroids : List<Asteroid>
+      +Bullets   : List<Bullet>
+      +Score     : int
+      +TimeSinceStart : float
+    }
+  }
+
+  package "Services" {
+    class SpawnerRules {
+      +FieldDesiredCount : int
+      +FieldRadius       : float
+      +DespawnRadius     : float
+      +MinSpawnDistance  : float
+      +InitialFillMultiplier : float
+      +RuntimeFillMultiplier  : float
+      +MinRadius : float
+      +MaxRadius : float
+    }
+
+    class WeaponRules {
+      +BulletSpeed : float
+      +BulletLife  : float
+      +FireRatePerSecond : float
+      +MuzzleOffset : float
+    }
+
+    class Collision {
+      +PointInSphere(p:Vec3, c:Vec3, r:float) : bool
+    }
+  }
+}
+
+package "Application" {
+  package "Ports" {
+    interface IInputProvider {
+      +MouseDeltaX : float
+      +MouseDeltaY : float
+      +FirePressed : bool
+    }
+    interface ITimeProvider {
+      +DeltaTime : float
+    }
+    interface IRandomProvider {
+      +NextFloat(min:float, max:float) : float
+    }
+    interface ILineRendererPort {
+      +BeginFrame()
+      +AddLine(ax,ay,az,bx,by,bz)
+      +EndFrame()
+    }
+  }
+
+  package "UseCases" {
+    class PlayerControlUseCase {
+      -yaw : float
+      -pitch : float
+      +Execute(state: GameState)
+    }
+    class TickUseCase {
+      +Execute(state: GameState)
+    }
+    class ShootUseCase {
+      +Execute(state: GameState)
+    }
+    class AsteroidFieldUseCase {
+      +InitializeField(state: GameState)
+      +UpdateField(state: GameState)
+    }
+  }
+}
+
+package "Infrastructure" {
+  package "Input" {
+    class KeyboardMouseInputAdapter
+  }
+  package "Time" {
+    class UnityTimeAdapter
+  }
+  package "Random" {
+    class SystemRandomAdapter
+  }
+  package "Rendering" {
+    class LineMeshBatchRenderer
+  }
+}
+
+package "Presentation" {
+  package "Bootstrap" {
+    class GameInstaller {
+      +gameState : GameState
+      +tickUC : TickUseCase
+      +shootUC : ShootUseCase
+      +playerCtrlUC : PlayerControlUseCase
+      +fieldUC : AsteroidFieldUseCase
+      +spawnerRules : SpawnerRules
+      +weaponRules  : WeaponRules
+    }
+    class GameController {
+      +Update()
+    }
+  }
+  package "HUD" {
+    class WireframePresenter
+    class VectorHudPresenter
+  }
+}
+
+' Relationships (implements)
+KeyboardMouseInputAdapter ..|> IInputProvider
+UnityTimeAdapter ..|> ITimeProvider
+SystemRandomAdapter ..|> IRandomProvider
+LineMeshBatchRenderer ..|> ILineRendererPort
+
+' UseCases dependencies to Ports/Rules
+PlayerControlUseCase --> IInputProvider
+PlayerControlUseCase --> ITimeProvider
+TickUseCase --> ITimeProvider
+ShootUseCase --> IInputProvider
+ShootUseCase --> WeaponRules
+AsteroidFieldUseCase --> IRandomProvider
+AsteroidFieldUseCase --> SpawnerRules
+
+' UseCases work on Domain state
+PlayerControlUseCase --> GameState
+TickUseCase --> GameState
+ShootUseCase --> GameState
+AsteroidFieldUseCase --> GameState
+
+' Presenters consume GameState and renderer
+WireframePresenter --> GameState
+WireframePresenter --> ILineRendererPort
+VectorHudPresenter --> GameState
+VectorHudPresenter --> ILineRendererPort
+
+' Presentation wires everything
+GameInstaller --> GameState
+GameInstaller --> TickUseCase
+GameInstaller --> ShootUseCase
+GameInstaller --> PlayerControlUseCase
+GameInstaller --> AsteroidFieldUseCase
+GameInstaller --> SpawnerRules
+GameInstaller --> WeaponRules
+GameController --> GameInstaller
+GameController ..> WireframePresenter
+GameController ..> VectorHudPresenter
+GameController ..> ILineRendererPort
+
+@enduml
+
+
+@startuml Architecture_UpdateSequence
+title VectorArcade — Main Update Loop (Sequence)
+
+skinparam monochrome true
+skinparam defaultFontName Consolas
+
+actor Unity as U
+participant GameController as GC
+participant PlayerControlUseCase as PC
+participant AsteroidFieldUseCase as AF
+participant TickUseCase as TU
+participant ShootUseCase as SU
+participant LineMeshBatchRenderer as LMR
+participant WireframePresenter as WP
+participant VectorHudPresenter as VHP
+
+U -> GC : Update()
+GC -> PC : Execute(state)\n(yaw/pitch + avance recto)
+GC -> AF : UpdateField(state)\n(despawn/reponer perímetro)
+GC -> TU : Execute(state)\n(mueve balas, colisiones, score)
+GC -> SU : Execute(state)\n(disparo según cooldown y reglas)
+GC -> GC : Sync Camera (pos/rot del Player)
+GC -> LMR : BeginFrame()
+GC -> WP : DrawAll(renderer, state, cam)\n(retícula, asteroides, balas)
+GC -> VHP : DrawScore(renderer, state, cam)\nDrawFps(renderer, cam)
+GC -> LMR : EndFrame()
+
+@enduml
