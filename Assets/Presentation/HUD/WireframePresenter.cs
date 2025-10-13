@@ -68,6 +68,49 @@ namespace VectorArcade.Presentation.HUD
             lines.AddLine(x - hx, y - hy, z - hz, x + hx, y + hy, z + hz);
         }
 
+        public static void DrawMissile(ILineRendererPort lines, Missile m)
+        {
+            // triángulo apuntando en dirección de su velocidad
+            var pos = new UnityEngine.Vector3(m.Position.x, m.Position.y, m.Position.z);
+            var v = new UnityEngine.Vector3(m.Velocity.x, m.Velocity.y, m.Velocity.z);
+            if (v.sqrMagnitude < 1e-6f) v = UnityEngine.Vector3.forward;
+            var dir = v.normalized;
+            var right = UnityEngine.Vector3.Cross(UnityEngine.Vector3.up, dir).normalized;
+            var up = UnityEngine.Vector3.Cross(dir, right);
+
+            float len = 2.0f;
+            float half = 0.6f;
+
+            var tip = pos + dir * len;
+            var a = pos - dir * 0.5f + right * half;
+            var b = pos - dir * 0.5f - right * half;
+
+            lines.AddLine(tip.x, tip.y, tip.z, a.x, a.y, a.z);
+            lines.AddLine(tip.x, tip.y, tip.z, b.x, b.y, b.z);
+            lines.AddLine(a.x, a.y, a.z, b.x, b.y, b.z);
+        }
+
+        public static void DrawItem(ILineRendererPort lines, Item it, Camera cam)
+        {
+            float s = 1.2f;
+            var t = cam.transform;
+
+            // base del rombo orientado al plano de cámara
+            var pos = new UnityEngine.Vector3(it.Position.x, it.Position.y, it.Position.z);
+            var right = t.right * s;
+            var up = t.up * s;
+
+            var a = pos - right * 0.5f;
+            var b = pos + up * 0.5f;
+            var c = pos + right * 0.5f;
+            var d = pos - up * 0.5f;
+
+            lines.AddLine(a.x, a.y, a.z, b.x, b.y, b.z);
+            lines.AddLine(b.x, b.y, b.z, c.x, c.y, c.z);
+            lines.AddLine(c.x, c.y, c.z, d.x, d.y, d.z);
+            lines.AddLine(d.x, d.y, d.z, a.x, a.y, a.z);
+        }
+
         // ───────────────── Dibuja todo
         public static void DrawAll(ILineRendererPort lines, GameState state, Camera cam)
         {
@@ -78,6 +121,12 @@ namespace VectorArcade.Presentation.HUD
 
             for (int i = 0; i < state.Bullets.Count; i++)
                 DrawBullet(lines, state.Bullets[i]);
+
+            for (int i = 0; i < state.Missiles.Count; i++)
+                DrawMissile(lines, state.Missiles[i]);
+
+            for (int i = 0; i < state.Items.Count; i++)
+                DrawItem(lines, state.Items[i], cam);
         }
     }
 }

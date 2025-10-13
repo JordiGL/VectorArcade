@@ -3,10 +3,13 @@ namespace VectorArcade.Application.Ports
 {
     public interface IInputProvider
     {
-        bool FirePressed { get; }
-
-        // Delta de ratón por frame (ejes clásicos)
         float MouseDeltaX { get; }
         float MouseDeltaY { get; }
+
+        // Disparo primario (láser): botón izq. o barra espaciadora
+        bool FirePrimary { get; }
+
+        // Disparo secundario (misil): botón derecho
+        bool FireSecondary { get; }
     }
 }

@@ -154,9 +154,10 @@ MonoBehaviour:
   fieldRadius: 280
   despawnRadius: 340
   minSpawnDistance: 60
+  runtimeFillMultiplier: 2
   minRadius: 0.6
   maxRadius: 2.2
-  initialFillMultiplier: 1.8
+  initialFillMultiplier: 2
 --- !u!4 &128818700
 Transform:
   m_ObjectHideFlags: 0

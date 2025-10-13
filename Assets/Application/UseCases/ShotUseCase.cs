@@ -1,3 +1,4 @@
+// Assets/Application/UseCases/ShootUseCase.cs
 using VectorArcade.Application.Ports;
 using VectorArcade.Domain.Core;
 using VectorArcade.Domain.Entities;
@@ -18,23 +19,54 @@ namespace VectorArcade.Application.UseCases
 
         public void Execute(GameState state)
         {
-            if (!_input.FirePressed) return;
-            if (state.Player.ShootCooldown > 0f) return;
+            // Láser (primario)
+            if (state.Player.ShootCooldownPrimary <= 0f && _input.FirePrimary)
+                FireBlaster(state);
 
-            // Cooldown desde cadencia: 1 / dps
-            float interval = (_rules.FireRatePerSecond > 0f) ? (1f / _rules.FireRatePerSecond) : 0.2f;
-            state.Player.ShootCooldown = interval;
+            // Misil (secundario): solo si hay misiles disponibles
+            if (state.Player.MissilesLeft > 0 &&
+                state.Player.ShootCooldownSecondary <= 0f &&
+                _input.FireSecondary)
+            {
+                FireMissile(state);
+                state.Player.MissilesLeft--; // ← consume uno
+                if (state.Player.MissilesLeft <= 0)
+                    state.Player.CurrentWeapon = WeaponType.Blaster; // vuelve al láser
+            }
+        }
 
-            // Crear bala desde el muzzle (delante de la cámara)
-            Vec3 origin  = state.Player.Position + state.Player.Forward * _rules.MuzzleOffset;
-            Vec3 vel     = state.Player.Forward * _rules.BulletSpeed;
+        void FireBlaster(GameState state)
+        {
+            float interval = (_rules.FireRatePerSecond > 0f) ? (1f / _rules.FireRatePerSecond) : 0.15f;
+            state.Player.ShootCooldownPrimary = interval;
+
+            Vec3 origin = state.Player.Position + state.Player.Forward * _rules.MuzzleOffset;
+            Vec3 vel = state.Player.Forward * _rules.BulletSpeed;
 
             state.Bullets.Add(new Bullet
             {
                 Position = origin,
                 Velocity = vel,
-                Life     = _rules.BulletLife,
-                Alive    = true
+                Life = _rules.BulletLife,
+                Alive = true
+            });
+        }
+
+        void FireMissile(GameState state)
+        {
+            float interval = (_rules.MissileFireRatePerSec > 0f) ? (1f / _rules.MissileFireRatePerSec) : 0.5f;
+            state.Player.ShootCooldownSecondary = interval;
+
+            Vec3 origin = state.Player.Position + state.Player.Forward * _rules.MuzzleOffset;
+            Vec3 vel = state.Player.Forward * _rules.MissileSpeed;
+
+            state.Missiles.Add(new Missile
+            {
+                Position = origin,
+                Velocity = vel,
+                Life = _rules.MissileLife,
+                Alive = true,
+                ExplosionRadius = _rules.MissileExplosionRadius
             });
         }
     }

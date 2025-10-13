@@ -3,14 +3,19 @@ namespace VectorArcade.Domain.Services
 {
     public sealed class WeaponRules
     {
-        // Velocidad de la bala (u/s) y vida (s) → alcance ≈ speed * life
+        // Blaster
         public float BulletSpeed = 100f;
-        public float BulletLife  = 4.0f;
-
-        // Cadencia en disparos por segundo (p. ej. 5.5 ≈ cada ~0.18s)
+        public float BulletLife = 4.0f;
         public float FireRatePerSecond = 5.5f;
-
-        // Desfase del cañón desde la cámara, en unidades
         public float MuzzleOffset = 1.5f;
+
+        // Misil
+        public float MissileSpeed = 70f;
+        public float MissileLife = 6.0f;
+        public float MissileFireRatePerSec = 1.8f;
+        public float MissileExplosionRadius = 12f;
+
+        // Power-up
+        public int MissilesPerPickup = 4;
     }
 }

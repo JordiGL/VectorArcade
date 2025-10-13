@@ -10,28 +10,29 @@ namespace VectorArcade.Presentation.Bootstrap
 
         void Update()
         {
-            // 1) Mirar y avanzar (recto en +Z mundial)
             installer.playerCtrlUC.Execute(installer.gameState);
-
-            // 2) Mantener el campo de asteroides alrededor del jugador
             installer.fieldUC.UpdateField(installer.gameState);
 
-            // 3) Lógica (balas, colisiones, score)
+            // Nuevo: items (spawn + homing + pickup)
+            installer.itemUC.Execute(installer.gameState, installer.weaponRules);
+
             installer.tickUC.Execute(installer.gameState);
             installer.shootUC.Execute(installer.gameState);
 
-            // 4) Cámara = posición + forward del player
+            // cámara y dibujo (como ya lo tienes)
             var p = installer.gameState.Player;
-            var pos = new Vector3(p.Position.x, p.Position.y, p.Position.z);
-            var fwd = new Vector3(p.Forward.x, p.Forward.y, p.Forward.z);
-            Camera.main.transform.SetPositionAndRotation(pos, Quaternion.LookRotation(fwd, Vector3.up));
+            var pos = new UnityEngine.Vector3(p.Position.x, p.Position.y, p.Position.z);
+            var fwd = new UnityEngine.Vector3(p.Forward.x, p.Forward.y, p.Forward.z);
+            Camera.main.transform.SetPositionAndRotation(pos, UnityEngine.Quaternion.LookRotation(fwd, UnityEngine.Vector3.up));
 
-            // 5) Dibujar
-            VectorHudPresenter.UpdateFps(); // antes de dibujar HUD
+            VectorArcade.Presentation.HUD.VectorHudPresenter.UpdateFps();
             installer.lineRenderer.BeginFrame();
-            WireframePresenter.DrawAll(installer.lineRenderer, installer.gameState, Camera.main);
-            VectorHudPresenter.DrawScore(installer.lineRenderer, installer.gameState, Camera.main);
-            VectorHudPresenter.DrawFps(installer.lineRenderer, Camera.main);
+            VectorArcade.Presentation.HUD.WireframePresenter.DrawAll(installer.lineRenderer, installer.gameState, Camera.main);
+
+            // HUD (score + fps)
+            VectorArcade.Presentation.HUD.VectorHudPresenter.DrawScore(installer.lineRenderer, installer.gameState, Camera.main);
+            VectorArcade.Presentation.HUD.VectorHudPresenter.DrawFps(installer.lineRenderer, Camera.main);
+
             installer.lineRenderer.EndFrame();
         }
     }

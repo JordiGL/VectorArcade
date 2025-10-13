@@ -9,6 +9,8 @@ namespace VectorArcade.Domain.Services
         public Player Player = new();
         public List<Asteroid> Asteroids = new();
         public List<Bullet> Bullets = new();
+        public List<Missile> Missiles = new List<Missile>();
+        public List<Item> Items = new List<Item>();
         public int Score = 0;
         public float TimeSinceStart = 0f;
     }

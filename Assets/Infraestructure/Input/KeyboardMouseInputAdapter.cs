@@ -1,17 +1,33 @@
 // Assets/Infrastructure/Input/KeyboardMouseInputAdapter.cs
 using UnityEngine;
 using VectorArcade.Application.Ports;
-using UInput = UnityEngine.Input;
 
 namespace VectorArcade.Infrastructure.Input
 {
     public sealed class KeyboardMouseInputAdapter : MonoBehaviour, IInputProvider
     {
-        [SerializeField] KeyCode fireKey = KeyCode.Space;
+        [Header("Mouse look")]
+        public float mouseSensitivity = 1.0f;
 
-        public bool FirePressed => UInput.GetKey(fireKey) || UInput.GetMouseButton(0);
-        public float MouseDeltaX => UInput.GetAxis("Mouse X");
-        public float MouseDeltaY => UInput.GetAxis("Mouse Y");
+        public float MouseDeltaX { get; private set; }
+        public float MouseDeltaY { get; private set; }
+
+        public bool FirePrimary { get; private set; } // left / space
+        public bool FireSecondary { get; private set; } // right
+
+        void Update()
+        {
+            MouseDeltaX = UnityEngine.Input.GetAxisRaw("Mouse X") * mouseSensitivity;
+            MouseDeltaY = UnityEngine.Input.GetAxisRaw("Mouse Y") * mouseSensitivity;
+
+            // Primary: botón izquierdo o Space
+            bool leftClick = UnityEngine.Input.GetMouseButton(0);
+            bool space = UnityEngine.Input.GetKey(KeyCode.Space);
+            FirePrimary = leftClick || space;
+
+            // Secondary: botón derecho
+            FireSecondary = UnityEngine.Input.GetMouseButton(1);
+        }
 
         void OnEnable()
         {
