@@ -13,8 +13,8 @@ namespace VectorArcade.Infrastructure.Rendering
         [SerializeField] bool interpretWorldSpace = true;
 
         Mesh _mesh;
-        readonly List<Vector3> _verts = new(4096);
-        readonly List<int> _indices = new(8192);
+        readonly List<Vector3> _verts = new(8192);
+        readonly List<int> _indices = new(16384);
 
         void Awake()
         {
@@ -55,10 +55,12 @@ namespace VectorArcade.Infrastructure.Rendering
 
         public void EndFrame()
         {
-            _mesh.Clear();
+            _mesh.Clear(false); // no borra el layout → menos GC/CPU
             _mesh.SetVertices(_verts);
-            _mesh.SetIndices(_indices, MeshTopology.Lines, 0, true);
-            _mesh.RecalculateBounds();
+            _mesh.SetIndices(_indices, MeshTopology.Lines, 0, false);
+            // Evita calcular bounds cada frame; usa un AABB amplio y estable
+            _mesh.bounds = new Bounds(Vector3.zero, new Vector3(10000f, 10000f, 10000f));
         }
+
     }
 }

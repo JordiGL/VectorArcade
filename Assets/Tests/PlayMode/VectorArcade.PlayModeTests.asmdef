@@ -1,0 +1,22 @@
+{
+  "name": "VectorArcade.PlayModeTests",
+  "references": [
+    "VectorArcade.Domain",
+    "VectorArcade.Application",
+    "VectorArcade.Application.Ports",
+    "VectorArcade.Infrastructure"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "noEngineReferences": false,
+  "versionDefines": [],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "useGUIDs": false
+}

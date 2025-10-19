@@ -1,0 +1,7 @@
+{
+  "name": "VectorArcade.Infrastructure",
+  "references": [
+    "VectorArcade.Application.Ports"
+  ],
+  "noEngineReferences": false
+}

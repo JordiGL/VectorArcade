@@ -131,9 +131,9 @@ namespace VectorArcade.Application.UseCases
             }
 
             // Compactar colecciones
-            state.Asteroids = state.Asteroids.Where(x => x.Alive).ToList();
-            state.Bullets = state.Bullets.Where(x => x.Alive).ToList();
-            state.Missiles = state.Missiles.Where(x => x.Alive).ToList();
+            state.Asteroids.RemoveAll(a => !a.Alive);
+            state.Bullets.RemoveAll(b => !b.Alive);
+            state.Missiles.RemoveAll(m => !m.Alive);
         }
     }
 }

@@ -1,0 +1,23 @@
+{
+  "name": "VectorArcade.EditModeTests",
+  "references": [
+    "VectorArcade.Domain",
+    "VectorArcade.Application",
+    "VectorArcade.Application.Ports"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "noEngineReferences": false,
+  "versionDefines": [],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "useGUIDs": false
+}
