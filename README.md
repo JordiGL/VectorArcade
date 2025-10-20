@@ -80,7 +80,7 @@ Domain/
  │
  └─ Services/
      ├─ PhysicsService      → colisiones, movimiento
-     ├─ SpawnerRules        → define parámetros de spawn/despawn
+     ├─ AsteroidRules       → define parámetros de spawn/despawn
      └─ FieldRules          → densidad y radio de entorno
 
 Application/

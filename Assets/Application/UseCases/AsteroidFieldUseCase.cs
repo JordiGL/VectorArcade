@@ -10,13 +10,13 @@ namespace VectorArcade.Application.UseCases
     public sealed class AsteroidFieldUseCase
     {
         private readonly IRandomProvider _rng;
-        public SpawnerRules Rules { get; }
+        public AsteroidRules Rules { get; }
 
         // Rango de giro (grados/seg) para la variedad visual
         const float SPIN_MIN = 8f;
         const float SPIN_MAX = 28f;
 
-        public AsteroidFieldUseCase(IRandomProvider rng, SpawnerRules rules)
+        public AsteroidFieldUseCase(IRandomProvider rng, AsteroidRules rules)
         {
             _rng = rng;
             Rules = rules;

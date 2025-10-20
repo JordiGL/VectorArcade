@@ -39,7 +39,7 @@ package "Domain" {
   }
 
   package "Services" {
-    class SpawnerRules {
+    class AsteroidRules {
       +FieldDesiredCount : int
       +FieldRadius       : float
       +DespawnRadius     : float
@@ -125,7 +125,7 @@ package "Presentation" {
       +shootUC : ShootUseCase
       +playerCtrlUC : PlayerControlUseCase
       +fieldUC : AsteroidFieldUseCase
-      +spawnerRules : SpawnerRules
+      +asteroidRules : AsteroidRules
       +weaponRules  : WeaponRules
     }
     class GameController {

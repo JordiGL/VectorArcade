@@ -1,15 +1,15 @@
-// Assets/Presentation/Debug/SpawnerRulesLiveTuner.cs
+// Assets/Presentation/Debug/AsteroidRulesLiveTuner.cs
 using UnityEngine;
 using VectorArcade.Presentation.Bootstrap;
 using VectorArcade.Domain.Services;
 
 namespace VectorArcade.Presentation.DebugTools
 {
-    /// Permite ajustar SpawnerRules en caliente desde la escena.
+    /// Permite ajustar AsteroidRules en caliente desde la escena.
     /// - Marca "Apply Continuously" para aplicar cada frame en Play.
     /// - Usa "Apply Now" para empujar valores manualmente.
     /// - Usa "Refill Initial Field" para reprobar el campo inicial (cuidado: puede ser costoso).
-    public sealed class SpawnerRulesLiveTuner : MonoBehaviour
+    public sealed class AsteroidRulesLiveTuner : MonoBehaviour
     {
         [Header("Scene wiring")]
         public GameInstaller installer;
@@ -35,7 +35,7 @@ namespace VectorArcade.Presentation.DebugTools
         {
             if (installer == null) return;
             // Cargamos valores actuales del installer → UI
-            var r = installer.spawnerRules;
+            var r = installer.asteroidRules;
             fieldDesiredCount = r.FieldDesiredCount;
             fieldRadius = r.FieldRadius;
             despawnRadius = r.DespawnRadius;
@@ -59,7 +59,7 @@ namespace VectorArcade.Presentation.DebugTools
             if (installer == null) return;
 
             // Sanitizar y aplicar al objeto de reglas compartido
-            var r = installer.spawnerRules;
+            var r = installer.asteroidRules;
 
             if (maxRadius < minRadius) maxRadius = minRadius;
 

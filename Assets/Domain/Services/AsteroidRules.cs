@@ -1,7 +1,7 @@
-// Assets/Domain/Services/SpawnerRules.cs
+// Assets/Domain/Services/AsteroidRules.cs
 namespace VectorArcade.Domain.Services
 {
-    public sealed class SpawnerRules
+    public sealed class AsteroidRules
     {
         // Población objetivo en runtime
         public int FieldDesiredCount = 180;   // antes 80
