@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using VectorArcade.Application.Ports;
 using VectorArcade.Domain.Entities;
@@ -167,6 +168,30 @@ namespace VectorArcade.Presentation.HUD
             lines.AddLine(d.x, d.y, d.z, a.x, a.y, a.z);
         }
 
+        public static void DrawPlanet(ILineRendererPort lines, Planet p, int segments = 24)
+        {
+            // Tres anillos ortogonales (XY, XZ, YZ) para simular esfera wireframe
+            float r = p.Radius;
+            var c = new Vector3(p.Position.x, p.Position.y, p.Position.z);
+
+            void DrawCircle(Vector3 center, Vector3 ex, Vector3 ey)
+            {
+                double step = (Math.PI * 2.0) / segments;
+                Vector3 prev = center + ex * r;
+                for (int i = 1; i <= segments; i++)
+                {
+                    double t = step * i;
+                    Vector3 pt = center + (float)Math.Cos(t) * ex * r + (float)Math.Sin(t) * ey * r;
+                    lines.AddLine(prev.x, prev.y, prev.z, pt.x, pt.y, pt.z);
+                    prev = pt;
+                }
+            }
+
+            DrawCircle(c, Vector3.right, Vector3.up);     // XY
+            DrawCircle(c, Vector3.right, Vector3.forward);// XZ
+            DrawCircle(c, Vector3.forward, Vector3.up);   // YZ
+        }
+
         // ───────────────── Dibuja todo
         public static void DrawAll(ILineRendererPort lines, GameState state, Camera cam, float crosshairDist, float crosshairSize, Color crosshairColor)
         {
@@ -176,6 +201,10 @@ namespace VectorArcade.Presentation.HUD
             float t = state.TimeSinceStart;
             for (int i = 0; i < state.Asteroids.Count; i++)
                 DrawAsteroid3D(lines, state.Asteroids[i], t);
+
+            // Planets (esfera wireframe)
+            for (int i = 0; i < state.Planets.Count; i++)
+                DrawPlanet(lines, state.Planets[i], 24);
 
             for (int i = 0; i < state.Bullets.Count; i++)
                 DrawBullet(lines, state.Bullets[i]);

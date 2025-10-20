@@ -27,6 +27,7 @@ namespace VectorArcade.Presentation.Bootstrap
         {
             installer.playerCtrlUC.Execute(installer.gameState);
             installer.fieldUC.UpdateField(installer.gameState);
+            installer.planetUC.UpdateField(installer.gameState);
 
             // items (spawn + homing + pickup)
             installer.itemUC.Execute(installer.gameState, installer.weaponRules);

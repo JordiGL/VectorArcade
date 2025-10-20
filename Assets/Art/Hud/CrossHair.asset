@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CrosshairDistance: 2.5
   CrosshairSize: 0.05
-  Color: 6
+  Color: 4

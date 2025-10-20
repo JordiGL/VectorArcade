@@ -130,10 +130,32 @@ namespace VectorArcade.Application.UseCases
                 }
             }
 
+            // Colisiones misil-PLANETA (solo misil lo destruye)
+            for (int i = 0; i < state.Missiles.Count; i++)
+            {
+                var m = state.Missiles[i];
+                if (!m.Alive) continue;
+
+                for (int j = 0; j < state.Planets.Count; j++)
+                {
+                    var pl = state.Planets[j];
+                    if (!pl.Alive) continue;
+
+                    if (VectorArcade.Domain.Physics.Collision.PointInSphere(m.Position, pl.Position, pl.Radius))
+                    {
+                        pl.Alive = false;
+                        m.Alive = false;
+                        state.Score += 100; // recompensa mayor por planeta
+                        break;
+                    }
+                }
+            }
+
             // Compactar colecciones
             state.Asteroids.RemoveAll(a => !a.Alive);
             state.Bullets.RemoveAll(b => !b.Alive);
             state.Missiles.RemoveAll(m => !m.Alive);
+            state.Planets.RemoveAll(pl => !pl.Alive);
         }
     }
 }

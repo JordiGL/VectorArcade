@@ -19,6 +19,7 @@ namespace VectorArcade.Presentation.Bootstrap
 
         [Header("Configs")]
         public SpawnerRules spawnerRules = new();
+        public PlanetRules planetRules = new();
         public WeaponRules weaponRules = new();
         public ItemRules itemRules = new();
 
@@ -30,6 +31,7 @@ namespace VectorArcade.Presentation.Bootstrap
         [HideInInspector] public ShootUseCase shootUC;
         [HideInInspector] public PlayerControlUseCase playerCtrlUC;
         [HideInInspector] public AsteroidFieldUseCase fieldUC;
+        [HideInInspector] public PlanetFieldUseCase planetUC;
         [HideInInspector] public ItemUseCase itemUC;
 
         void Awake()
@@ -41,12 +43,14 @@ namespace VectorArcade.Presentation.Bootstrap
             shootUC = new ShootUseCase(inputAdapter, weaponRules);
             playerCtrlUC = new PlayerControlUseCase(inputAdapter, timeAdapter);
             fieldUC = new AsteroidFieldUseCase(randomAdapter, spawnerRules);
+            planetUC = new PlanetFieldUseCase(randomAdapter, planetRules);
             itemUC = new ItemUseCase(timeAdapter, randomAdapter, itemRules);
         }
 
         void Start()
         {
             fieldUC.InitializeField(gameState);
+            planetUC.InitializeField(gameState);
         }
     }
 }
