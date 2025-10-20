@@ -1,8 +1,5 @@
-// Assets/Presentation/HUD/WireframePresenter.cs
-using System;
 using UnityEngine;
 using VectorArcade.Application.Ports;
-using VectorArcade.Domain.Core;
 using VectorArcade.Domain.Entities;
 using VectorArcade.Domain.Services;
 
@@ -25,37 +22,66 @@ namespace VectorArcade.Presentation.HUD
             lines.AddLine((c - u).x, (c - u).y, (c - u).z, (c + u).x, (c + u).y, (c + u).z);
         }
 
-        // ───────────────── Asteroide: círculo segmentado en el plano XY
-        public static void DrawAsteroid(ILineRendererPort lines, Asteroid a, int segments = 16)
+        // ───────────────── Asteroide: wireframe 3D con forma irregular + rotación
+        public static void DrawAsteroid3D(ILineRendererPort lines, Asteroid a, float timeSinceStart)
         {
-            float r = a.Radius;
-            float z = a.Position.z;
-            float cx = a.Position.x;
-            float cy = a.Position.y;
+            WireAsteroidShapes.Ensure(8);
 
-            double step = (Math.PI * 2.0) / segments;
-            float px = cx + r, py = cy;
+            var shape = WireAsteroidShapes.Get(a.ShapeIndex);
+            var verts = shape.verts;
+            var edges = shape.edges;
 
-            for (int i = 1; i <= segments; i++)
+            var axis = new Vector3(a.SpinAxis.x, a.SpinAxis.y, a.SpinAxis.z);
+            if (axis.sqrMagnitude < 1e-8f) axis = Vector3.up;
+            axis.Normalize();
+
+            float angle = a.SpinPhase + a.SpinSpeed * timeSinceStart;
+            var rot = Quaternion.AngleAxis(angle, axis);
+
+            float s = a.Radius;
+            var center = new Vector3(a.Position.x, a.Position.y, a.Position.z);
+
+            // Si el puerto soporta color, lo usamos para atenuar “interiores”
+            IColorLineRendererPort colorPort = lines as IColorLineRendererPort;
+
+            // Dirección aproximada de cámara (para un efecto sencillo y barato)
+            Vector3 viewDir = (Camera.main != null) ? Camera.main.transform.forward : Vector3.forward;
+
+            for (int i = 0; i < edges.Length; i++)
             {
-                double t = step * i;
-                float x = cx + r * (float)Math.Cos(t);
-                float y = cy + r * (float)Math.Sin(t);
-                lines.AddLine(px, py, z, x, y, z);
-                px = x; py = y;
+                var e = edges[i];
+                Vector3 p0 = center + rot * (verts[e.a] * s);
+                Vector3 p1 = center + rot * (verts[e.b] * s);
+
+                if (colorPort != null)
+                {
+                    // Heurística barata: usamos el punto medio y su vector desde el centro para estimar “frente/espalda”
+                    Vector3 mid = (p0 + p1) * 0.5f;
+                    Vector3 fromCenter = (mid - center).normalized;
+
+                    // dot ≈ 1 → hacia cámara → más opaco; dot ≈ 0 → lateral → tenue
+                    float dot = Mathf.Abs(Vector3.Dot(fromCenter, viewDir));
+                    byte alpha = (byte)Mathf.Clamp(Mathf.Lerp(40f, 255f, dot), 0f, 255f);
+
+                    var col = new Rgba32(255, 255, 255, alpha);
+                    colorPort.AddLine(p0.x, p0.y, p0.z, p1.x, p1.y, p1.z, col);
+                }
+                else
+                {
+                    // Fallback: sin color → mismo grosor/alpha que antes
+                    lines.AddLine(p0.x, p0.y, p0.z, p1.x, p1.y, p1.z);
+                }
             }
         }
 
         // ───────────────── Bala: pequeño trazo en dirección Z local de la bala
         public static void DrawBullet(ILineRendererPort lines, Bullet b)
         {
-            // Dibuja la bala a lo largo de su dirección de movimiento (velocity)
             const float len = 2.0f;
 
-            // Normaliza la velocidad
             float vx = b.Velocity.x, vy = b.Velocity.y, vz = b.Velocity.z;
             float mag = Mathf.Sqrt(vx * vx + vy * vy + vz * vz);
-            if (mag < 1e-5f) mag = 1f; // evita división por cero
+            if (mag < 1e-5f) mag = 1f;
 
             float dx = vx / mag, dy = vy / mag, dz = vz / mag;
 
@@ -70,13 +96,12 @@ namespace VectorArcade.Presentation.HUD
 
         public static void DrawMissile(ILineRendererPort lines, Missile m)
         {
-            // triángulo apuntando en dirección de su velocidad
-            var pos = new UnityEngine.Vector3(m.Position.x, m.Position.y, m.Position.z);
-            var v = new UnityEngine.Vector3(m.Velocity.x, m.Velocity.y, m.Velocity.z);
-            if (v.sqrMagnitude < 1e-6f) v = UnityEngine.Vector3.forward;
+            var pos = new Vector3(m.Position.x, m.Position.y, m.Position.z);
+            var v = new Vector3(m.Velocity.x, m.Velocity.y, m.Velocity.z);
+            if (v.sqrMagnitude < 1e-6f) v = Vector3.forward;
             var dir = v.normalized;
-            var right = UnityEngine.Vector3.Cross(UnityEngine.Vector3.up, dir).normalized;
-            var up = UnityEngine.Vector3.Cross(dir, right);
+            var right = Vector3.Cross(Vector3.up, dir).normalized;
+            var up = Vector3.Cross(dir, right);
 
             float len = 2.0f;
             float half = 0.6f;
@@ -95,8 +120,7 @@ namespace VectorArcade.Presentation.HUD
             float s = 1.2f;
             var t = cam.transform;
 
-            // base del rombo orientado al plano de cámara
-            var pos = new UnityEngine.Vector3(it.Position.x, it.Position.y, it.Position.z);
+            var pos = new Vector3(it.Position.x, it.Position.y, it.Position.z);
             var right = t.right * s;
             var up = t.up * s;
 
@@ -116,8 +140,10 @@ namespace VectorArcade.Presentation.HUD
         {
             DrawCrosshair(lines, cam);
 
+            // Asteroides wireframe 3D con rotación temporal
+            float t = state.TimeSinceStart;
             for (int i = 0; i < state.Asteroids.Count; i++)
-                DrawAsteroid(lines, state.Asteroids[i], 18);
+                DrawAsteroid3D(lines, state.Asteroids[i], t);
 
             for (int i = 0; i < state.Bullets.Count; i++)
                 DrawBullet(lines, state.Bullets[i]);

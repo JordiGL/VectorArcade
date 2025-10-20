@@ -469,7 +469,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fdfb0f1f9ce83bb448bfd48362356a1c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fireKey: 32
+  mouseSensitivity: 1
 --- !u!114 &1710164476
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -564,7 +564,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e653101140634bd418941c1702fa81c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lineMaterial: {fileID: 2100000, guid: 2e98a265163327647befd65fd4de94c7, type: 2}
+  lineMaterial: {fileID: 2100000, guid: f5bf53c7128afb142a60eaa803edb141, type: 2}
   interpretWorldSpace: 1
 --- !u!23 &2132710816
 MeshRenderer:

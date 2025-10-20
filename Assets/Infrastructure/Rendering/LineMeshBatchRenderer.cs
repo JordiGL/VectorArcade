@@ -5,23 +5,23 @@ using VectorArcade.Application.Ports;
 namespace VectorArcade.Infrastructure.Rendering
 {
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
-    public sealed class LineMeshBatchRenderer : MonoBehaviour, ILineRendererPort
+    public sealed class LineMeshBatchRenderer : MonoBehaviour, ILineRendererPort, IColorLineRendererPort
     {
         [SerializeField] Material lineMaterial;
-
-        // Nuevo: interpreta las posiciones recibidas como coordenadas de MUNDO.
         [SerializeField] bool interpretWorldSpace = true;
 
         Mesh _mesh;
         readonly List<Vector3> _verts = new(8192);
         readonly List<int> _indices = new(16384);
+        readonly List<Color32> _colors = new(8192); // ← colores por vértice
 
         void Awake()
         {
             _mesh = new Mesh { name = "LineBatchMesh" };
             _mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-            GetComponent<MeshFilter>().sharedMesh = _mesh;
+            _mesh.MarkDynamic();
 
+            GetComponent<MeshFilter>().sharedMesh = _mesh;
             var mr = GetComponent<MeshRenderer>();
             if (lineMaterial != null) mr.sharedMaterial = lineMaterial;
         }
@@ -30,9 +30,19 @@ namespace VectorArcade.Infrastructure.Rendering
         {
             _verts.Clear();
             _indices.Clear();
+            _colors.Clear();
         }
 
+        // Implementación del puerto clásico (sin color) → blanco opaco
         public void AddLine(float ax, float ay, float az, float bx, float by, float bz)
+            => AddLine(ax, ay, az, bx, by, bz, new Color32(255, 255, 255, 255));
+
+        // Implementación del puerto con color
+        public void AddLine(float ax, float ay, float az, float bx, float by, float bz, Rgba32 color)
+            => AddLine(ax, ay, az, bx, by, bz, new Color32(color.r, color.g, color.b, color.a));
+
+        // Interno que realmente añade con Color32 Unity
+        void AddLine(float ax, float ay, float az, float bx, float by, float bz, Color32 color)
         {
             int i = _verts.Count;
 
@@ -51,16 +61,18 @@ namespace VectorArcade.Infrastructure.Rendering
 
             _indices.Add(i);
             _indices.Add(i + 1);
+
+            _colors.Add(color);
+            _colors.Add(color);
         }
 
         public void EndFrame()
         {
-            _mesh.Clear(false); // no borra el layout → menos GC/CPU
+            _mesh.Clear(false);
             _mesh.SetVertices(_verts);
             _mesh.SetIndices(_indices, MeshTopology.Lines, 0, false);
-            // Evita calcular bounds cada frame; usa un AABB amplio y estable
+            _mesh.SetColors(_colors);
             _mesh.bounds = new Bounds(Vector3.zero, new Vector3(10000f, 10000f, 10000f));
         }
-
     }
 }
