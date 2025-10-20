@@ -8,13 +8,16 @@ namespace VectorArcade.Application.UseCases
     public sealed class TickUseCase
     {
         private readonly ITimeProvider _time;
-        private readonly WeaponRules _weaponRules; // ← NUEVO
+        private readonly WeaponRules _weaponRules;
+        private readonly ScoreRules _scoreRules; // ← NUEVO
 
-        public TickUseCase(ITimeProvider time, WeaponRules weaponRules) // ← ctor actualizado
+        public TickUseCase(ITimeProvider time, WeaponRules weaponRules, ScoreRules scoreRules) // ← ctor actualizado
         {
             _time = time;
-            _weaponRules = weaponRules; // ← guarda reglas
+            _weaponRules = weaponRules;
+            _scoreRules = scoreRules;
         }
+
         public void Execute(GameState state)
         {
             float dt = _time.DeltaTime;
@@ -65,7 +68,7 @@ namespace VectorArcade.Application.UseCases
                     {
                         a.Alive = false;
                         b.Alive = false;
-                        state.Score += 10;
+                        state.Score += _scoreRules.AsteroidDestroyed; // ← antes 10
                         break;
                     }
                 }
@@ -89,9 +92,12 @@ namespace VectorArcade.Application.UseCases
 
                         state.Player.CurrentWeapon = WeaponType.Missile;
                         state.Player.MissilesLeft = _weaponRules.MissilesPerPickup;
+
+                        if (_scoreRules.ItemPickup != 0)
+                            state.Score += _scoreRules.ItemPickup;
+
                         break;
                     }
-
                 }
             }
 
@@ -108,20 +114,21 @@ namespace VectorArcade.Application.UseCases
 
                     if (Domain.Physics.Collision.PointInSphere(m.Position, a.Position, a.Radius))
                     {
-                        // Explota: elimina todos los asteroides dentro del radio
                         float r = m.ExplosionRadius;
                         float r2 = r * r;
                         for (int k = 0; k < state.Asteroids.Count; k++)
                         {
                             var ak = state.Asteroids[k];
                             if (!ak.Alive) continue;
+
                             float dx = ak.Position.x - m.Position.x;
                             float dy = ak.Position.y - m.Position.y;
                             float dz = ak.Position.z - m.Position.z;
+
                             if (dx * dx + dy * dy + dz * dz <= r2)
                             {
                                 ak.Alive = false;
-                                state.Score += 10;
+                                state.Score += _scoreRules.AsteroidDestroyed; // ← antes 10
                             }
                         }
                         m.Alive = false;
@@ -145,7 +152,7 @@ namespace VectorArcade.Application.UseCases
                     {
                         pl.Alive = false;
                         m.Alive = false;
-                        state.Score += 100; // recompensa mayor por planeta
+                        state.Score += _scoreRules.PlanetDestroyed; // ← antes 100
                         break;
                     }
                 }

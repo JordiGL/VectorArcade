@@ -18,6 +18,7 @@ namespace VectorArcade.Presentation.Bootstrap
         public SystemRandomAdapter randomAdapter;
 
         [Header("Configs")]
+        public ScoreRules scoreRules = new();
         public AsteroidRules asteroidRules = new();
         public PlanetRules planetRules = new();
         public WeaponRules weaponRules = new();
@@ -39,7 +40,7 @@ namespace VectorArcade.Presentation.Bootstrap
             gameState = new GameState();
             gameState.Player.Forward = new Domain.Core.Vec3(0, 0, 1);
 
-            tickUC = new TickUseCase(timeAdapter, weaponRules);
+            tickUC = new TickUseCase(timeAdapter, weaponRules, scoreRules);
             shootUC = new ShootUseCase(inputAdapter, weaponRules);
             playerCtrlUC = new PlayerControlUseCase(inputAdapter, timeAdapter);
             fieldUC = new AsteroidFieldUseCase(randomAdapter, asteroidRules);

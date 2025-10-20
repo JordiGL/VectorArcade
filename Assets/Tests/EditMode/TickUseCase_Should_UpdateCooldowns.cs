@@ -68,8 +68,8 @@ public class TickUseCase_Should_UpdateCooldowns
             Life = 1.0f,
             Alive = true
         });
-
-        var tick = new TickUseCase(time, weaponRules);
+        var score = new ScoreRules { AsteroidDestroyed = 10, PlanetDestroyed = 100, ItemPickup = 0 };
+        var tick = new TickUseCase(time, weaponRules, score);
 
         // Ejecuta 2 ticks de 0.5 s = 1.0 s total
         tick.Execute(state);
