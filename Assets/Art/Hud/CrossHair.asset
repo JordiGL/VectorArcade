@@ -13,4 +13,5 @@ MonoBehaviour:
   m_Name: CrossHair
   m_EditorClassIdentifier: 
   CrosshairDistance: 2.5
-  CrosshairSize: 0.02
+  CrosshairSize: 0.05
+  Color: 6

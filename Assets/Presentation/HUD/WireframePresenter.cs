@@ -7,6 +7,30 @@ namespace VectorArcade.Presentation.HUD
 {
     public static class WireframePresenter
     {
+
+        static Rgba32 ToRgba32(Color c)
+        {
+            byte r = (byte)Mathf.Clamp(Mathf.RoundToInt(c.r * 255f), 0, 255);
+            byte g = (byte)Mathf.Clamp(Mathf.RoundToInt(c.g * 255f), 0, 255);
+            byte b = (byte)Mathf.Clamp(Mathf.RoundToInt(c.b * 255f), 0, 255);
+            byte a = (byte)Mathf.Clamp(Mathf.RoundToInt(c.a * 255f), 0, 255);
+            return new Rgba32(r, g, b, a);
+        }
+
+        static void AddLineSmart(ILineRendererPort lines, Vector3 a, Vector3 b, Color color)
+        {
+            // Si el renderer soporta color, lo usamos
+            if (lines is IColorLineRendererPort colorPort)
+            {
+                colorPort.AddLine(a.x, a.y, a.z, b.x, b.y, b.z, ToRgba32(color));
+            }
+            else
+            {
+                // Fallback: blanco sin color
+                lines.AddLine(a.x, a.y, a.z, b.x, b.y, b.z);
+            }
+        }
+
         // ───────────────── Retícula (siempre delante de la cámara)
         public static void DrawCrosshair(ILineRendererPort lines, Camera cam, float dist, float size)
         {
@@ -19,6 +43,16 @@ namespace VectorArcade.Presentation.HUD
             lines.AddLine((c - u).x, (c - u).y, (c - u).z, (c + u).x, (c + u).y, (c + u).z);
         }
 
+        public static void DrawCrosshair(ILineRendererPort lines, Camera cam, float dist, float size, Color color)
+        {
+            var t = cam.transform;
+            Vector3 c = t.position + t.forward * dist;
+            Vector3 r = t.right * size;
+            Vector3 u = t.up * size;
+
+            AddLineSmart(lines, c - r, c + r, color);
+            AddLineSmart(lines, c - u, c + u, color);
+        }
 
         // ───────────────── Asteroide: wireframe 3D con forma irregular + rotación
         public static void DrawAsteroid3D(ILineRendererPort lines, Asteroid a, float timeSinceStart)
@@ -134,9 +168,9 @@ namespace VectorArcade.Presentation.HUD
         }
 
         // ───────────────── Dibuja todo
-        public static void DrawAll(ILineRendererPort lines, GameState state, Camera cam, float crosshairDist = 2.5f, float crosshairSize = 0.05f)
+        public static void DrawAll(ILineRendererPort lines, GameState state, Camera cam, float crosshairDist, float crosshairSize, Color crosshairColor)
         {
-            DrawCrosshair(lines, cam, crosshairDist, crosshairSize);
+            DrawCrosshair(lines, cam, crosshairDist, crosshairSize, crosshairColor);
 
             // Asteroides wireframe 3D con rotación temporal
             float t = state.TimeSinceStart;
