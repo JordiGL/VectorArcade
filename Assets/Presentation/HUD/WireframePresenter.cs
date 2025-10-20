@@ -8,11 +8,8 @@ namespace VectorArcade.Presentation.HUD
     public static class WireframePresenter
     {
         // ───────────────── Retícula (siempre delante de la cámara)
-        public static void DrawCrosshair(ILineRendererPort lines, Camera cam)
+        public static void DrawCrosshair(ILineRendererPort lines, Camera cam, float dist, float size)
         {
-            const float dist = 2.5f;  // distancia desde la cámara
-            const float size = 0.12f; // mitad de longitud de cada trazo
-
             var t = cam.transform;
             Vector3 c = t.position + t.forward * dist;
             Vector3 r = t.right * size;
@@ -21,6 +18,7 @@ namespace VectorArcade.Presentation.HUD
             lines.AddLine((c - r).x, (c - r).y, (c - r).z, (c + r).x, (c + r).y, (c + r).z);
             lines.AddLine((c - u).x, (c - u).y, (c - u).z, (c + u).x, (c + u).y, (c + u).z);
         }
+
 
         // ───────────────── Asteroide: wireframe 3D con forma irregular + rotación
         public static void DrawAsteroid3D(ILineRendererPort lines, Asteroid a, float timeSinceStart)
@@ -136,9 +134,9 @@ namespace VectorArcade.Presentation.HUD
         }
 
         // ───────────────── Dibuja todo
-        public static void DrawAll(ILineRendererPort lines, GameState state, Camera cam)
+        public static void DrawAll(ILineRendererPort lines, GameState state, Camera cam, float crosshairDist = 2.5f, float crosshairSize = 0.05f)
         {
-            DrawCrosshair(lines, cam);
+            DrawCrosshair(lines, cam, crosshairDist, crosshairSize);
 
             // Asteroides wireframe 3D con rotación temporal
             float t = state.TimeSinceStart;

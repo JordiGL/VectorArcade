@@ -518,6 +518,7 @@ MonoBehaviour:
   inputAdapter: {fileID: 1710164475}
   lineRenderer: {fileID: 2132710815}
   randomAdapter: {fileID: 1710164477}
+  hudSettings: {fileID: 11400000, guid: 99d0129ee510a7c4896fcd75a72e7fa5, type: 2}
 --- !u!1 &2132710813
 GameObject:
   m_ObjectHideFlags: 0

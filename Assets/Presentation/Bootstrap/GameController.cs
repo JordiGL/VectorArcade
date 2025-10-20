@@ -27,7 +27,13 @@ namespace VectorArcade.Presentation.Bootstrap
 
             VectorArcade.Presentation.HUD.VectorHudPresenter.UpdateFps();
             installer.lineRenderer.BeginFrame();
-            VectorArcade.Presentation.HUD.WireframePresenter.DrawAll(installer.lineRenderer, installer.gameState, Camera.main);
+            VectorArcade.Presentation.HUD.WireframePresenter.DrawAll(
+                installer.lineRenderer,
+                installer.gameState,
+                Camera.main,
+                installer.hudSettings != null ? installer.hudSettings.CrosshairDistance : 2.5f,
+                installer.hudSettings != null ? installer.hudSettings.CrosshairSize : 0.05f
+            );
 
             // HUD (score + fps)
             VectorArcade.Presentation.HUD.VectorHudPresenter.DrawScore(installer.lineRenderer, installer.gameState, Camera.main);

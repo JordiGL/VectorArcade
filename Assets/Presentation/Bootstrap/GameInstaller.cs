@@ -5,6 +5,7 @@ using VectorArcade.Domain.Services;
 using VectorArcade.Infrastructure.Input;
 using VectorArcade.Infrastructure.Rendering;
 using VectorArcade.Infrastructure.Time;
+using VectorArcade.Presentation.Config;
 
 namespace VectorArcade.Presentation.Bootstrap
 {
@@ -20,6 +21,9 @@ namespace VectorArcade.Presentation.Bootstrap
         public SpawnerRules spawnerRules = new();
         public WeaponRules weaponRules = new();
         public ItemRules itemRules = new();
+
+        [Header("HUD")]
+        public HudSettings hudSettings;
 
         [HideInInspector] public GameState gameState;
         [HideInInspector] public TickUseCase tickUC;
