@@ -11,5 +11,8 @@ namespace VectorArcade.Domain.Services
 
         /// <summary>Puntos por recoger un item (si aplicase puntuación).</summary>
         public int ItemPickup = 0;
+
+        /// <summary>Puntos por destruir un cometa.</summary>
+        public int CometDestroyed = 25;
     }
 }

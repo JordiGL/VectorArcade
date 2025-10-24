@@ -191,6 +191,21 @@ namespace VectorArcade.Presentation.HUD
             DrawCircle(c, Vector3.right, Vector3.forward);// XZ
             DrawCircle(c, Vector3.forward, Vector3.up);   // YZ
         }
+        // ───────────────── Cometa: trazo en sentido contrario a su velocidad (estela)
+        public static void DrawComet(ILineRendererPort lines, Comet c)
+        {
+            // Trazo en sentido contrario a su velocidad (estela)
+            var pos = new Vector3(c.Position.x, c.Position.y, c.Position.z);
+            var vel = new Vector3(c.Velocity.x, c.Velocity.y, c.Velocity.z);
+            if (vel.sqrMagnitude < 1e-6f) vel = Vector3.forward;
+            var dir = vel.normalized;
+
+            float len = 6.0f;
+            var tail = pos - dir * len;
+
+            // Si tienes AddLineSmart (color opcional):
+            AddLineSmart(lines, tail, pos, new Color(1f, 1f, 1f, 0.9f));
+        }
 
         // ───────────────── Dibuja todo
         public static void DrawAll(ILineRendererPort lines, GameState state, Camera cam, float crosshairDist, float crosshairSize, Color crosshairColor)
@@ -214,6 +229,9 @@ namespace VectorArcade.Presentation.HUD
 
             for (int i = 0; i < state.Items.Count; i++)
                 DrawItem(lines, state.Items[i], cam);
+
+            for (int i = 0; i < state.Comets.Count; i++)
+                DrawComet(lines, state.Comets[i]);
         }
     }
 }

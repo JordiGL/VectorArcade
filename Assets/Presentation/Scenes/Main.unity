@@ -130,7 +130,7 @@ GameObject:
   - component: {fileID: 128818700}
   - component: {fileID: 128818699}
   m_Layer: 0
-  m_Name: SpawnerRulesTuner
+  m_Name: AsteroidRulesTuner
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

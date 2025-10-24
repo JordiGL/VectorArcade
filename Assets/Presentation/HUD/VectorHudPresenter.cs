@@ -47,6 +47,9 @@ namespace VectorArcade.Presentation.HUD
             { ' ', (0, Array.Empty<(Vector2, Vector2)>()) },
             { 'F', ((1<<0)|(1<<5)|(1<<6)|(1<<4), Array.Empty<(Vector2, Vector2)>()) }, // para FPS
             { 'P', ((1<<0)|(1<<5)|(1<<1)|(1<<6)|(1<<4), Array.Empty<(Vector2, Vector2)>() ) }, // para FPS
+            { 'I', (kDigitMasks[1], Array.Empty<(Vector2, Vector2)>() ) }, // aproximaci�n usando d�gito 1
+            // N mejorada: columnas laterales + doble diagonal para m�s grosor
+            { 'N', ((1<<5)|(1<<2), new (Vector2, Vector2)[]{ (new(0.18f,0.15f), new(0.82f,0.85f)), (new(0.15f,0.15f), new(0.78f,0.85f)) }) },
         };
 
         private static void DrawChar(ILineRendererPort lines, char ch, Vector3 origin, Vector3 right, Vector3 up, float size)
@@ -108,6 +111,23 @@ namespace VectorArcade.Presentation.HUD
             }
         }
 
+        static void DrawTextAtViewportCentered(ILineRendererPort lines, Camera cam, string text,
+                                               float dist, float size, float spacing,
+                                               float vx, float vy)
+        {
+            var t = cam.transform;
+            Vector3 center = cam.ViewportToWorldPoint(new Vector3(vx, vy, dist));
+            float step = size * (1f + spacing);
+            float total = text.Length * step;
+            Vector3 start = center - t.right * (total * 0.5f);
+            Vector3 pen = start;
+            for (int i = 0; i < text.Length; i++)
+            {
+                DrawChar(lines, text[i], pen, t.right, t.up, size);
+                pen += t.right * step;
+            }
+        }
+
         // ───────── SCORE (top-left) ─────────
         public static void DrawScore(ILineRendererPort lines, GameState state, Camera cam)
         {
@@ -138,5 +158,69 @@ namespace VectorArcade.Presentation.HUD
             // margen 6% desde la derecha y 94% de altura
             DrawTextAtViewportRightAligned(lines, cam, label, dist, size, spacing, 0.94f, 0.94f);
         }
+
+        public static void DrawGameOver(ILineRendererPort lines, Camera cam)
+        {
+            const float dist = 2.5f;
+            DrawTextAtViewportCentered(lines, cam, "FIN", dist, 0.24f, 0.25f, 0.5f, 0.58f);
+            DrawTextAtViewportCentered(lines, cam, "REINICIAR", dist, 0.16f, 0.20f, 0.5f, 0.42f);
+        }
+
+        // ───────────────── Vitals (abajo-izquierda): escudo y vidas
+        static void DrawShieldIcon(ILineRendererPort lines, Vector3 origin, Vector3 right, Vector3 up, float size)
+        {
+            // Escudo estilizado: pentágono con punta inferior
+            Vector3 a = origin + right * (0.15f * size) + up * (0.85f * size);
+            Vector3 b = origin + right * (0.85f * size) + up * (0.85f * size);
+            Vector3 c = origin + right * (0.95f * size) + up * (0.45f * size);
+            Vector3 d = origin + right * (0.50f * size) + up * (0.10f * size);
+            Vector3 e = origin + right * (0.05f * size) + up * (0.45f * size);
+
+            lines.AddLine(a.x, a.y, a.z, b.x, b.y, b.z);
+            lines.AddLine(b.x, b.y, b.z, c.x, c.y, c.z);
+            lines.AddLine(c.x, c.y, c.z, d.x, d.y, d.z);
+            lines.AddLine(d.x, d.y, d.z, e.x, e.y, e.z);
+            lines.AddLine(e.x, e.y, e.z, a.x, a.y, a.z);
+        }
+
+        static void DrawHeartIcon(ILineRendererPort lines, Vector3 origin, Vector3 right, Vector3 up, float size)
+        {
+            // Corazón simple de líneas (aprox)
+            Vector3 p0 = origin + right * (0.50f * size) + up * (0.15f * size); // punta inferior
+            Vector3 p1 = origin + right * (0.15f * size) + up * (0.55f * size);
+            Vector3 p2 = origin + right * (0.30f * size) + up * (0.90f * size);
+            Vector3 p3 = origin + right * (0.50f * size) + up * (0.80f * size);
+            Vector3 p4 = origin + right * (0.70f * size) + up * (0.90f * size);
+            Vector3 p5 = origin + right * (0.85f * size) + up * (0.55f * size);
+
+            lines.AddLine(p0.x, p0.y, p0.z, p1.x, p1.y, p1.z);
+            lines.AddLine(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z);
+            lines.AddLine(p2.x, p2.y, p2.z, p3.x, p3.y, p3.z);
+            lines.AddLine(p3.x, p3.y, p3.z, p4.x, p4.y, p4.z);
+            lines.AddLine(p4.x, p4.y, p4.z, p5.x, p5.y, p5.z);
+            lines.AddLine(p5.x, p5.y, p5.z, p0.x, p0.y, p0.z);
+        }
+
+        public static void DrawVitals(ILineRendererPort lines, GameState state, Camera cam)
+        {
+            var t = cam.transform;
+            const float dist = 2.5f;
+            const float icon = 0.16f;      // tamaño de icono
+            const float text = 0.12f;      // tamaño de dígitos
+            const float spacing = 0.20f;   // espaciado de dígitos
+
+            // Shield (fila superior)
+            Vector3 shOrigin = cam.ViewportToWorldPoint(new Vector3(0.06f, 0.10f, dist));
+            DrawShieldIcon(lines, shOrigin, t.right, t.up, icon);
+            // números a la derecha del icono
+            DrawTextAtViewport(lines, cam, state.Player.ShieldPercent.ToString(), dist, text, spacing, 0.12f, 0.10f);
+
+            // Lives (fila inferior)
+            Vector3 lvOrigin = cam.ViewportToWorldPoint(new Vector3(0.06f, 0.18f, dist));
+            DrawHeartIcon(lines, lvOrigin, t.right, t.up, icon);
+            DrawTextAtViewport(lines, cam, state.Player.Lives.ToString(), dist, text, spacing, 0.12f, 0.18f);
+        }
     }
 }
+
+

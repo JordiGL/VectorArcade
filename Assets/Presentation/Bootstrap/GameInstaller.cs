@@ -23,6 +23,7 @@ namespace VectorArcade.Presentation.Bootstrap
         public PlanetRules planetRules = new();
         public WeaponRules weaponRules = new();
         public ItemRules itemRules = new();
+        public CometRules cometRules = new();
 
         [Header("HUD")]
         public HudSettings hudSettings;
@@ -34,6 +35,8 @@ namespace VectorArcade.Presentation.Bootstrap
         [HideInInspector] public AsteroidFieldUseCase fieldUC;
         [HideInInspector] public PlanetFieldUseCase planetUC;
         [HideInInspector] public ItemUseCase itemUC;
+        [HideInInspector]
+        public CometUseCase cometUC;
 
         void Awake()
         {
@@ -46,6 +49,8 @@ namespace VectorArcade.Presentation.Bootstrap
             fieldUC = new AsteroidFieldUseCase(randomAdapter, asteroidRules);
             planetUC = new PlanetFieldUseCase(randomAdapter, planetRules);
             itemUC = new ItemUseCase(timeAdapter, randomAdapter, itemRules);
+            cometUC = new CometUseCase(timeAdapter, randomAdapter, cometRules);
+            gameState.CometRules = cometRules;
         }
 
         void Start()

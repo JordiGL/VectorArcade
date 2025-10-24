@@ -9,6 +9,7 @@ namespace VectorArcade.Domain.Entities
     {
         public Vec3 Position;
         public Vec3 Forward;   // dirección de avance (normalizada en lógica)
+        public Vec3 Velocity;  // vector de movimiento actual (u/s)
         public float Speed;    // unidades/seg
         public float ShootRate;     // seg entre disparos
 
@@ -19,5 +20,8 @@ namespace VectorArcade.Domain.Entities
         // Power-up de misil por tiempo (0 = infinito si así lo decides en rules)
         public WeaponType CurrentWeapon = WeaponType.Blaster; // informativo
         public int MissilesLeft = 0;
+
+        public int ShieldPercent = 100; // 0..100
+        public int Lives = 3;           // vidas restantes
     }
 }

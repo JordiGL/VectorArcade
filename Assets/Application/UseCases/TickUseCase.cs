@@ -158,11 +158,87 @@ namespace VectorArcade.Application.UseCases
                 }
             }
 
+            // ───────── Balas vs Cometas (daños por impactos)
+            for (int i = 0; i < state.Bullets.Count; i++)
+            {
+                var b = state.Bullets[i];
+                if (!b.Alive) continue;
+
+                for (int j = 0; j < state.Comets.Count; j++)
+                {
+                    var c = state.Comets[j];
+                    if (!c.Alive) continue;
+
+                    if (Domain.Physics.Collision.PointInSphere(b.Position, c.Position, c.Radius))
+                    {
+                        b.Alive = false;
+                        c.HitsToKill--;
+                        if (c.HitsToKill <= 0)
+                        {
+                            c.Alive = false;
+                            state.Score += _scoreRules.CometDestroyed; // ← usa ScoreRules
+                        }
+                        break;
+                    }
+                }
+            }
+
+            // ───────── Misiles vs Cometas (un impacto los destruye)
+            for (int i = 0; i < state.Missiles.Count; i++)
+            {
+                var m = state.Missiles[i];
+                if (!m.Alive) continue;
+
+                for (int j = 0; j < state.Comets.Count; j++)
+                {
+                    var c = state.Comets[j];
+                    if (!c.Alive) continue;
+
+                    if (Domain.Physics.Collision.PointInSphere(m.Position, c.Position, c.Radius))
+                    {
+                        c.Alive = false;
+                        m.Alive = false;
+                        state.Score += _scoreRules.CometDestroyed;
+                        break;
+                    }
+                }
+            }
+
+            // ───────── Cometas vs Jugador (aplican daño y desaparecen)
+            for (int j = 0; j < state.Comets.Count; j++)
+            {
+                var c = state.Comets[j];
+                if (!c.Alive) continue;
+
+                if (Domain.Physics.Collision.PointInSphere(state.Player.Position, c.Position, c.Radius))
+                {
+                    c.Alive = false;
+                    // Primero consume escudo en porcentaje; cuando llega a 0, los siguientes golpes restan vidas.
+                    if (state.Player.ShieldPercent > 0)
+                    {
+                        int dmg = (state.CometRules != null) ? state.CometRules.DamageToShieldPercent : 25;
+                        state.Player.ShieldPercent -= dmg;
+                        if (state.Player.ShieldPercent < 0) state.Player.ShieldPercent = 0;
+                    }
+                    else
+                    {
+                        state.Player.Lives -= 1;
+                        if (state.Player.Lives <= 0)
+                        {
+                            state.Player.Lives = 0;
+                            state.GameOver = true;
+                        }
+                    }
+                }
+            }
+
             // Compactar colecciones
             state.Asteroids.RemoveAll(a => !a.Alive);
             state.Bullets.RemoveAll(b => !b.Alive);
             state.Missiles.RemoveAll(m => !m.Alive);
             state.Planets.RemoveAll(pl => !pl.Alive);
+            state.Comets.RemoveAll(c => !c.Alive);
         }
     }
 }
+

@@ -30,12 +30,12 @@ namespace VectorArcade.Application.UseCases
         public void Execute(GameState state)
         {
             // 1) Rotación a partir del ratón
-            yaw   += _input.MouseDeltaX * MOUSE_SENS_X;
+            yaw += _input.MouseDeltaX * MOUSE_SENS_X;
             pitch -= _input.MouseDeltaY * MOUSE_SENS_Y;          // invertido como FPS
-            pitch  = Math.Clamp(pitch, -80f, 80f);               // evita mirar demasiado arriba/abajo
+            pitch = Math.Clamp(pitch, -80f, 80f);               // evita mirar demasiado arriba/abajo
 
             // 2) Dirección de mirada (forward) con yaw + pitch
-            float ry = yaw   * (float)Math.PI / 180f;
+            float ry = yaw * (float)Math.PI / 180f;
             float rp = pitch * (float)Math.PI / 180f;
             float cy = (float)Math.Cos(ry);
             float sy = (float)Math.Sin(ry);
@@ -48,7 +48,11 @@ namespace VectorArcade.Application.UseCases
 
             // 3) Avance constante en +Z mundial (independiente de la mirada)
             float dt = _time.DeltaTime;
-            state.Player.Position = state.Player.Position + kMoveDir * (FORWARD_SPEED * dt);
+
+            state.Player.Speed = FORWARD_SPEED;
+            var vel = kMoveDir * FORWARD_SPEED;
+            state.Player.Velocity = vel;
+            state.Player.Position = state.Player.Position + vel * dt;
         }
     }
 }
