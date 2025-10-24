@@ -5,7 +5,7 @@ namespace VectorArcade.Domain.Services
     public sealed class CometRules
     {
         // Spawning
-        public float SpawnInterval = 8f;  // s (se puede reducir con dificultad)
+        public float SpawnInterval = 1f;  // s (se puede reducir con dificultad)
         public float PerimeterRadius = 360f;
 
         // Movimiento

@@ -155,8 +155,8 @@ namespace VectorArcade.Presentation.Bootstrap
 
             // Estilo arcade sencillo (cian/amarillo)
             _titleText = MakeText("TITLE", _goRoot.transform, "GAME OVER", 96, new Color(0.2f, 1f, 1f), new Vector2(0.5f, 0.72f), Vector2.zero);
-            _restartText = MakeText("REINICIAR", _goRoot.transform, "REINICIAR", 56, new Color(1.0f, 0.95f, 0.35f), new Vector2(0.5f, 0.52f), Vector2.zero);
-            _quitText = MakeText("SALIR", _goRoot.transform, "SALIR", 48, new Color(0.85f, 0.85f, 0.85f), new Vector2(0.5f, 0.38f), Vector2.zero);
+            _restartText = MakeText("REINICIAR", _goRoot.transform, "REINICIAR", 56, Color.white, new Vector2(0.5f, 0.52f), Vector2.zero);
+            _quitText = MakeText("SALIR", _goRoot.transform, "SALIR", 48, Color.white, new Vector2(0.5f, 0.38f), Vector2.zero);
             // Instrucciones
             MakeText("HELP", _goRoot.transform, "Flechas para cambiar  -  Intro/Espacio confirmar", 28, new Color(0.7f, 0.7f, 0.7f), new Vector2(0.5f, 0.28f), Vector2.zero);
 
@@ -184,13 +184,15 @@ namespace VectorArcade.Presentation.Bootstrap
 
             if (_goSelection == 0)
             {
-                _restartText.color = new Color(_restartText.color.r, _restartText.color.g, _restartText.color.b, a);
-                _quitText.color = new Color(_quitText.color.r, _quitText.color.g, _quitText.color.b, 1f);
+                // REINICIAR seleccionado: amarillo y parpadeo; SALIR en blanco sólido
+                _restartText.color = new Color(1.0f, 0.95f, 0.35f, a);
+                _quitText.color = new Color(1f, 1f, 1f, 1f);
             }
             else
             {
-                _restartText.color = new Color(_restartText.color.r, _restartText.color.g, _restartText.color.b, 1f);
-                _quitText.color = new Color(_quitText.color.r, _quitText.color.g, _quitText.color.b, a);
+                // SALIR seleccionado: amarillo y parpadeo; REINICIAR en blanco sólido
+                _restartText.color = new Color(1f, 1f, 1f, 1f);
+                _quitText.color = new Color(1.0f, 0.95f, 0.35f, a);
             }
         }
 
@@ -219,6 +221,3 @@ namespace VectorArcade.Presentation.Bootstrap
         }
     }
 }
-
-
-
