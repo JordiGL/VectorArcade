@@ -5,12 +5,14 @@ namespace VectorArcade.Domain.Services
     public sealed class CometRules
     {
         // Spawning
-        public float SpawnInterval = 1f;  // s (se puede reducir con dificultad)
+        public float SpawnInterval = 8f;  // s (se puede reducir con dificultad)
         public float PerimeterRadius = 360f;
+        public float SpawnConeDegrees = 20f; // Angulo (grados) del cono de aparici�n frente al jugador
 
         // Movimiento
-        public float Speed = 38f;         // u/s
-        public float AimLead = 1f;       // apunta un poco por delante del jugador
+        public float SpeedStart = 18f;    // u/s al aparecer (lejos)
+        public float SpeedEnd = 8f;       // u/s cerca del jugador
+        public float AimLead = 1f;        // apunta un poco por delante del jugador
 
         // Combate
         public int HitsToKill = 2;        // impactos de láser necesarios
@@ -21,3 +23,4 @@ namespace VectorArcade.Domain.Services
         public int ScoreOnKill = 25;
     }
 }
+

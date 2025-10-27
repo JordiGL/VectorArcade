@@ -191,20 +191,69 @@ namespace VectorArcade.Presentation.HUD
             DrawCircle(c, Vector3.right, Vector3.forward);// XZ
             DrawCircle(c, Vector3.forward, Vector3.up);   // YZ
         }
-        // ───────────────── Cometa: trazo en sentido contrario a su velocidad (estela)
-        public static void DrawComet(ILineRendererPort lines, Comet c)
+        // ───────────────── Cometa: cabeza estilizada + cola con restos
+        public static void DrawComet(ILineRendererPort lines, Comet c, float time)
         {
-            // Trazo en sentido contrario a su velocidad (estela)
             var pos = new Vector3(c.Position.x, c.Position.y, c.Position.z);
             var vel = new Vector3(c.Velocity.x, c.Velocity.y, c.Velocity.z);
             if (vel.sqrMagnitude < 1e-6f) vel = Vector3.forward;
             var dir = vel.normalized;
 
-            float len = 6.0f;
-            var tail = pos - dir * len;
+            // Base ortonormal para orientar la forma
+            var right = Vector3.Cross(Vector3.up, dir);
+            if (right.sqrMagnitude < 1e-6f) right = Vector3.right;
+            right.Normalize();
+            var up = Vector3.Cross(dir, right).normalized;
 
-            // Si tienes AddLineSmart (color opcional):
-            AddLineSmart(lines, tail, pos, new Color(1f, 1f, 1f, 0.9f));
+            // Cabeza del cometa (punta + base)
+            float head = Mathf.Max(1.2f, c.Radius * 2.0f);
+            var tip = pos + dir * head;
+            var baseCenter = pos - dir * (head * 0.35f);
+            var bl = baseCenter - right * (head * 0.45f);
+            var br = baseCenter + right * (head * 0.45f);
+            var bu = baseCenter + up * (head * 0.35f);
+            var bd = baseCenter - up * (head * 0.35f);
+
+            // Contorno de la cabeza (rombo estilizado)
+            AddLineSmart(lines, tip, br, new Color(1f, 1f, 1f, 0.95f));
+            AddLineSmart(lines, tip, bl, new Color(1f, 1f, 1f, 0.95f));
+            AddLineSmart(lines, br, bd, new Color(1f, 1f, 1f, 0.8f));
+            AddLineSmart(lines, bd, bl, new Color(1f, 1f, 1f, 0.8f));
+            AddLineSmart(lines, bl, bu, new Color(1f, 1f, 1f, 0.8f));
+            AddLineSmart(lines, bu, br, new Color(1f, 1f, 1f, 0.8f));
+
+            // Cola segmentada con pequeño jitter y alpha decreciente
+            int segments = 7;
+            float segLen = head * 0.9f;
+            var cur = pos;
+            for (int i = 0; i < segments; i++)
+            {
+                float t = (i + 1) / (float)segments;
+                float alpha = Mathf.Lerp(0.85f, 0.12f, t);
+
+                // Jitter pseudo-animado para una cola viva
+                float ph = time * 3.0f + i * 1.7f;
+                float amp = head * 0.12f * (1f - t);
+                var jitter = right * (Mathf.Sin(ph) * amp) + up * (Mathf.Cos(ph * 0.9f) * amp);
+
+                var next = cur - dir * segLen + jitter;
+                AddLineSmart(lines, cur, next, new Color(1f, 1f, 1f, alpha));
+                cur = next;
+            }
+
+            // Restos: pequeños trazos laterales cerca de la cola
+            int debris = 6;
+            float tailSpan = head * 6.0f;
+            for (int k = 0; k < debris; k++)
+            {
+                float u = (k + 1f) / (debris + 1f);
+                var basePt = pos - dir * (u * tailSpan);
+                float ph = time * 2.2f + k * 0.77f;
+                float off = head * 0.35f * (1f - u);
+                var a = basePt + (right * Mathf.Sin(ph) + up * Mathf.Cos(ph)) * off;
+                var b = a - dir * (head * 0.25f * (1f - u));
+                AddLineSmart(lines, a, b, new Color(1f, 1f, 1f, 0.18f));
+            }
         }
 
         // ───────────────── Dibuja todo
@@ -231,7 +280,7 @@ namespace VectorArcade.Presentation.HUD
                 DrawItem(lines, state.Items[i], cam);
 
             for (int i = 0; i < state.Comets.Count; i++)
-                DrawComet(lines, state.Comets[i]);
+                DrawComet(lines, state.Comets[i], t);
         }
     }
 }
