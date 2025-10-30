@@ -32,6 +32,56 @@ namespace VectorArcade.Presentation.HUD
             }
         }
 
+        // Núcleo común: asteroide/debris con mismo estilo y sombreado
+        static void DrawAsteroidWireCore(
+            ILineRendererPort lines,
+            int shapeIndex,
+            Vector3 center,
+            Vector3 axis,
+            float radius,
+            float spinSpeed,
+            float spinPhase,
+            float time,
+            float alphaMul)
+        {
+            WireAsteroidShapes.Ensure(8);
+            var shape = WireAsteroidShapes.Get(shapeIndex);
+            var verts = shape.verts;
+            var edges = shape.edges;
+
+            if (axis.sqrMagnitude < 1e-8f) axis = Vector3.up;
+            axis.Normalize();
+
+            float angle = spinPhase + spinSpeed * time;
+            var rot = Quaternion.AngleAxis(angle, axis);
+
+            float s = Mathf.Max(0.001f, radius);
+
+            IColorLineRendererPort colorPort = lines as IColorLineRendererPort;
+            Vector3 viewDir = (Camera.main != null) ? Camera.main.transform.forward : Vector3.forward;
+
+            for (int i = 0; i < edges.Length; i++)
+            {
+                var e = edges[i];
+                Vector3 p0 = center + rot * (verts[e.a] * s);
+                Vector3 p1 = center + rot * (verts[e.b] * s);
+
+                if (colorPort != null)
+                {
+                    Vector3 mid = (p0 + p1) * 0.5f;
+                    Vector3 fromCenter = (mid - center).normalized;
+                    float dot = Mathf.Abs(Vector3.Dot(fromCenter, viewDir));
+                    float a = Mathf.Clamp(Mathf.Lerp(40f, 255f, dot), 0f, 255f) * Mathf.Clamp01(alphaMul);
+                    var col = new Rgba32(255, 255, 255, (byte)a);
+                    colorPort.AddLine(p0.x, p0.y, p0.z, p1.x, p1.y, p1.z, col);
+                }
+                else
+                {
+                    lines.AddLine(p0.x, p0.y, p0.z, p1.x, p1.y, p1.z);
+                }
+            }
+        }
+
         // ───────────────── Retícula (siempre delante de la cámara)
         public static void DrawCrosshair(ILineRendererPort lines, Camera cam, float dist, float size)
         {
@@ -168,28 +218,73 @@ namespace VectorArcade.Presentation.HUD
             lines.AddLine(d.x, d.y, d.z, a.x, a.y, a.z);
         }
 
-        public static void DrawPlanet(ILineRendererPort lines, Planet p, int segments = 24)
+        public static void DrawPlanet(ILineRendererPort lines, Planet p, int segments = 48)
         {
-            // Tres anillos ortogonales (XY, XZ, YZ) para simular esfera wireframe
+            // Esfera wireframe mejorada: múltiples paralelos y meridianos + anillo ecuatorial reforzado
             float r = p.Radius;
-            var c = new Vector3(p.Position.x, p.Position.y, p.Position.z);
+            var center = new Vector3(p.Position.x, p.Position.y, p.Position.z);
 
-            void DrawCircle(Vector3 center, Vector3 ex, Vector3 ey)
+            IColorLineRendererPort colorPort = lines as IColorLineRendererPort;
+            Vector3 viewDir = (Camera.main != null) ? Camera.main.transform.forward : Vector3.forward;
+
+            void DrawCircleSmart(Vector3 c, Vector3 ex, Vector3 ey, byte alpha)
             {
                 double step = (Math.PI * 2.0) / segments;
-                Vector3 prev = center + ex * r;
+                Vector3 prev = c + ex * r;
                 for (int i = 1; i <= segments; i++)
                 {
                     double t = step * i;
-                    Vector3 pt = center + (float)Math.Cos(t) * ex * r + (float)Math.Sin(t) * ey * r;
-                    lines.AddLine(prev.x, prev.y, prev.z, pt.x, pt.y, pt.z);
+                    Vector3 pt = c + (float)Math.Cos(t) * ex * r + (float)Math.Sin(t) * ey * r;
+                    if (colorPort != null)
+                        colorPort.AddLine(prev.x, prev.y, prev.z, pt.x, pt.y, pt.z, new Rgba32(255, 255, 255, alpha));
+                    else
+                        lines.AddLine(prev.x, prev.y, prev.z, pt.x, pt.y, pt.z);
                     prev = pt;
                 }
             }
 
-            DrawCircle(c, Vector3.right, Vector3.up);     // XY
-            DrawCircle(c, Vector3.right, Vector3.forward);// XZ
-            DrawCircle(c, Vector3.forward, Vector3.up);   // YZ
+            // Anillo ecuatorial reforzado (triple pasada)
+            DrawCircleSmart(center, Vector3.right, Vector3.forward, 220);
+            DrawCircleSmart(center, Vector3.right * 0.98f, Vector3.forward * 0.98f, 140);
+            DrawCircleSmart(center, Vector3.right * 1.02f, Vector3.forward * 1.02f, 140);
+
+            // Paralelos (latitudes)
+            int latRings = 6;
+            for (int i = 1; i <= latRings; i++)
+            {
+                float t = i / (float)(latRings + 1);
+                float phi = Mathf.Lerp(-Mathf.PI * 0.5f, Mathf.PI * 0.5f, t);
+                float cphi = Mathf.Cos(phi);
+                float sphi = Mathf.Sin(phi);
+                Vector3 ex = Vector3.right * cphi;
+                Vector3 ey = Vector3.forward * cphi;
+                Vector3 c = center + Vector3.up * (sphi * r);
+                float ndot = Mathf.Abs(Vector3.Dot(Vector3.up, viewDir));
+                byte a = (byte)Mathf.Clamp(Mathf.Lerp(60f, 160f, 1f - ndot), 40f, 200f);
+                DrawCircleSmart(c, ex, ey, a);
+            }
+
+            // Meridianos (longitudes)
+            int lonRings = 10;
+            for (int j = 0; j < lonRings; j++)
+            {
+                float ang = (Mathf.PI * 2f) * (j / (float)lonRings);
+                Vector3 h = (Vector3.right * Mathf.Cos(ang) + Vector3.forward * Mathf.Sin(ang)).normalized;
+                Vector3 ex = h;
+                Vector3 ey = Vector3.up;
+                Vector3 planeNormal = Vector3.Cross(ex, ey).normalized;
+                float v = Mathf.Abs(Vector3.Dot(planeNormal, viewDir));
+                byte a = (byte)Mathf.Clamp(Mathf.Lerp(70f, 180f, v), 50f, 200f);
+                DrawCircleSmart(center, ex, ey, a);
+            }
+        }
+
+        public static void DrawPlanetDebris(ILineRendererPort lines, PlanetDebris d, float time)
+        {
+            var center = new Vector3(d.Position.x, d.Position.y, d.Position.z);
+            var axis = new Vector3(d.SpinAxis.x, d.SpinAxis.y, d.SpinAxis.z);
+            int shape = Mathf.Abs(d.ShapeIndex) % WireAsteroidShapes.Count;
+            DrawAsteroidWireCore(lines, shape, center, axis, Mathf.Max(0.4f, d.Radius), d.SpinSpeed, d.SpinPhase, time, 1f);
         }
         // ───────────────── Cometa: cabeza estilizada + cola con restos
         public static void DrawComet(ILineRendererPort lines, Comet c, float time)
@@ -278,6 +373,9 @@ namespace VectorArcade.Presentation.HUD
 
             for (int i = 0; i < state.Items.Count; i++)
                 DrawItem(lines, state.Items[i], cam);
+
+            for (int i = 0; i < state.PlanetDebris.Count; i++)
+                DrawPlanetDebris(lines, state.PlanetDebris[i], t);
 
             for (int i = 0; i < state.Comets.Count; i++)
                 DrawComet(lines, state.Comets[i], t);

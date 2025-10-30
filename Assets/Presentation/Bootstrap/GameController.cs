@@ -204,6 +204,7 @@ namespace VectorArcade.Presentation.Bootstrap
             state.Player.Velocity = Vec3.Zero;
             state.Player.ShieldPercent = 100;
             state.Player.Lives = 3;
+            state.Player.MissilesLeft = 3;
             state.Score = 0;
             state.TimeSinceStart = 0f;
             state.GameOver = false;
@@ -221,3 +222,4 @@ namespace VectorArcade.Presentation.Bootstrap
         }
     }
 }
+

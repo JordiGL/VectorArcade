@@ -42,6 +42,7 @@ namespace VectorArcade.Presentation.Bootstrap
         {
             gameState = new GameState();
             gameState.Player.Forward = new Domain.Core.Vec3(0, 0, 1);
+            gameState.Player.MissilesLeft = 3; // empieza con 3 misiles
 
             tickUC = new TickUseCase(timeAdapter, weaponRules, scoreRules);
             shootUC = new ShootUseCase(inputAdapter, weaponRules);
@@ -51,6 +52,7 @@ namespace VectorArcade.Presentation.Bootstrap
             itemUC = new ItemUseCase(timeAdapter, randomAdapter, itemRules);
             cometUC = new CometUseCase(timeAdapter, randomAdapter, cometRules);
             gameState.CometRules = cometRules;
+            gameState.PlanetRules = planetRules;
         }
 
         void Start()
@@ -60,3 +62,4 @@ namespace VectorArcade.Presentation.Bootstrap
         }
     }
 }
+
