@@ -78,10 +78,11 @@ namespace VectorArcade.Presentation.Bootstrap
                 crossColor
             );
 
-            // HUD (score + fps + vitals)
+            // HUD (score + fps + vitals + missiles)
             VectorArcade.Presentation.HUD.VectorHudPresenter.DrawScore(installer.lineRenderer, installer.gameState, Camera.main);
             VectorArcade.Presentation.HUD.VectorHudPresenter.DrawFps(installer.lineRenderer, Camera.main);
             VectorArcade.Presentation.HUD.VectorHudPresenter.DrawVitals(installer.lineRenderer, installer.gameState, Camera.main);
+            VectorArcade.Presentation.HUD.MissileHudPresenter.DrawMissiles(installer.lineRenderer, installer.gameState, Camera.main);
 
             installer.lineRenderer.EndFrame();
 
@@ -222,4 +223,3 @@ namespace VectorArcade.Presentation.Bootstrap
         }
     }
 }
-

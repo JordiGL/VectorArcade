@@ -112,7 +112,7 @@ namespace VectorArcade.Application.UseCases
                         b.Alive = false;
 
                         state.Player.CurrentWeapon = WeaponType.Missile;
-                        state.Player.MissilesLeft = _weaponRules.MissilesPerPickup;
+                        state.Player.MissilesLeft += _weaponRules.MissilesPerPickup;
 
                         if (_scoreRules.ItemPickup != 0)
                             state.Score += _scoreRules.ItemPickup;
